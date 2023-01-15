@@ -32,13 +32,6 @@ app.post('/:username', (req, res) => {
     res.json(user ? user : [])
 })
 
-//drive:
-app.get('/:username/drive', (req, res) => {
-    const user = fakeDB.users.find(user => user.username === req.params.username)
-    console.log(user.files)
-    res.json(user.files)
-})
-
 //register:
 app.post('/register/:username', (req, res) => {
     const user = fakeDB.users.find(user => user.username === req.body.username)
@@ -49,6 +42,13 @@ app.post('/register/:username', (req, res) => {
         fs.mkdir(`./users/${req.body.username}`, (err) => { if (err) throw err; });
     }
     res.json(user ? "This username is already in use" : null)
+})
+
+//drive:
+app.get('/:username/drive', (req, res) => {
+    const user = fakeDB.users.find(user => user.username === req.params.username)
+    console.log(user.files)
+    res.json(user.files)
 })
 
 // app.use('/', indexRouter);
