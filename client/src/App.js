@@ -11,7 +11,7 @@ function App() {
         <Routes>
           <Route index element={<Navigate replace to={'/login'}/>} />
           <Route path="/login" element={<Login/>} />
-          <Route path="/drive" element={<Drive/>}/>
+          <Route path="/:id/drive" element={<Drive/>}/>
         </Routes>
         {/* <Route path="*" element={<Error/>} /> */}
       </UserProvider>
