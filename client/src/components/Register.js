@@ -29,9 +29,6 @@ function Register(props) {
             else {
                 console.log("b")
                 setFlag(false)
-
-                const toDriveResponse = await fetch(`http://localhost:8000/${registerUsername}/drive`)
-                const toDriveData = await toDriveResponse.json()
                 navigate(`../${registerUsername}/drive`, { state: {username: registerUsername }});
             }
         }
