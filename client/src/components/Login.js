@@ -1,38 +1,39 @@
-import React, { useState } from 'react';
+import React, {  useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../userContexts/UserContext';
-// import "../css/Login.css"
 
-function Login(props) {
+
+function Login() {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const {userId, setUserId} = useUser(null);
     const [flag, setFlag] = useState(false)
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        // if (userId)
+        try {
+            const response = await fetch(`http://localhost:8000/${username}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password }),
+            })
+            const data = await response.json();
 
-        const response = await fetch(`http://localhost:8000/${username}`,)
-        const data = await response.json();
-        const item = (data[0])
+            if (data.length === 0) { 
+                setFlag(true)
+                return
+            }
+            else {
+                console.log("item: ", data)
+                const toDriveResponse = await fetch(`http://localhost:8000/${data.username}/drive`)
+                const toDriveData = await toDriveResponse.json()
+                console.log("toDriveData: ", toDriveData)
 
-        if (!item) { //username incorrect
-            setFlag(true)
-            return
+                navigate(`../${data.username}/drive`);
+            }
         }
-        let notPassword = item.address.geo.lat
-        let tempPassword = notPassword.slice(-4)
-
-        if (tempPassword === password) {
-            localStorage.setItem('currentUser', JSON.stringify(item));
-            props.setUserId(item.id);
-            navigate(`user/${item.id}/home`, { state: username });
-        }
-        else { //password incorrect
-            setFlag(true)
+        catch (error) {
+            console.log('error: ', error)
         }
     }
 

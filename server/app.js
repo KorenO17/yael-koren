@@ -20,40 +20,68 @@ app.use(express.static(path.join(__dirname, 'public')));
 let fakeDB = {
     users:
         [
-            { username: "a", id: 1, files: [] },
+        //   {username: "a", password:"a", files:[]}
         ]
 }
 
-app.get('/:id/drive', (req, res) => {
-    const user = fakeDB.users.find(user => user.id === Number(req.params.id))
-    console.log("hi")
+let currUser = ""
+
+//login:
+app.post('/:username', (req, res) => {
+    const user = fakeDB.users.find(user => (user.password === req.body.password && user.username === req.body.username))
+    console.log(user)
+    currUser = req.body.username
+    res.json(user ? user : [])
+})
+
+//register:
+app.post('/register/:username', (req, res) => {
+    const user = fakeDB.users.find(user => user.username === req.body.username)
+    console.log(user)
+    if (!user) {
+        fakeDB.users.push({ username: req.body.username, password: req.body.password, id: fakeDB.users.length + 1, files: [] })
+        console.log(fakeDB.users)
+        fs.mkdir(`./users/${req.body.username}`, (err) => { if (err) throw err; });
+    }
+    currUser = req.body.username
+    res.json(user ? "This username is already in use" : null)
+})
+
+//drive:
+app.get('/:username/drive', (req, res) => {
+    const user = fakeDB.users.find(user => user.username === req.params.username)
+    console.log(user.files)
     res.json(user.files)
 })
 
-app.post('/:id/drive', (req, res) => {
+app.get('/shlimziGibut',(req, res) => {
+    res.json(currUser)
+})
 
+app.post('/:username/drive', (req, res) => {
     if (req.body.folderName) {
-        const user = fakeDB.users.find(user => user.id === Number(req.params.id))
+        const user = fakeDB.users.find(user => user.username === req.params.username)
+        console.log(user);
         user.files.push({ name: req.body.folderName, files: [] })
-        if (!fs.existsSync(`./userexamp/${req.body.folderName}`)) {
-            fs.mkdirSync(`./userexamp/${req.body.folderName}`, { recursive: true });
+        if (!fs.existsSync(`./users/${currUser}/${req.body.folderName}`)) {
+            fs.mkdirSync(`./users/${currUser}/${req.body.folderName}`, { recursive: true });
         }
-        res.redirect('http://localhost:3000/1/drive')
+        res.redirect(`http://localhost:3000/${req.params.username}/drive`)
         res.json(user.files)
     }
     else if (req.body.fileName) {
-        const user = fakeDB.users.find(user => user.id === Number(req.params.id))
+        const user = fakeDB.users.find(user => user.username === req.params.username)
         user.files.push({ name: req.body.fileName })
         console.log(req.body.fileName);
         console.log(req.body.fileContent);
-        fs.appendFile(`./userexamp/${req.body.fileName}`,req.body.fileContent, function (err) {
+        fs.appendFile(`./users/${currUser}/${req.body.fileName}`, req.body.fileContent, function (err) {
             if (err) throw err;
             console.log('Saved!');
-          });
-        res.redirect('http://localhost:3000/1/drive')
+        });
+        res.redirect(`http://localhost:3000/${req.params.username}/drive`)
         res.json(user.files)
     }
-  
+
 })
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
