@@ -6,33 +6,45 @@ import { useUser } from '../userContexts/UserContext';
 function Login(props) {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const {userId, setUserId} = useUser(null);
+    const { userId, setUserId } = useUser(null);
     const [flag, setFlag] = useState(false)
     const navigate = useNavigate();
 
+
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
         // if (userId)
 
-        const response = await fetch(`http://localhost:8000/${username}`,)
-        const data = await response.json();
-        const item = (data[0])
+        //     const data = await res.json();
+        //     setAllFlavors(data)
 
-        if (!item) { //username incorrect
-            setFlag(true)
-            return
-        }
-        let notPassword = item.address.geo.lat
-        let tempPassword = notPassword.slice(-4)
+        try {
+            const response = await fetch(`http://localhost:8000/${username}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password }),
+            })
+            const data = await response.json();
+            const item = (data)
 
-        if (tempPassword === password) {
-            localStorage.setItem('currentUser', JSON.stringify(item));
-            props.setUserId(item.id);
-            navigate(`user/${item.id}/home`, { state: username });
+            if (item.length === 0) { //username or password are incorrect
+                setUserId(null)
+                setFlag(true)
+                return
+            }
+            else {
+                console.log("item: ", item)
+                setUserId(item.id)
+                const toDriveResponse = await fetch(`http://localhost:8000/${item.username}/drive`)
+                const toDriveData = await toDriveResponse.json()
+                console.log("toDriveData: ", toDriveData)
+
+                navigate(`../${item.username}/drive`, { state: {username: item.username }});
+            }
         }
-        else { //password incorrect
-            setFlag(true)
+        catch (error) {
+            console.log('error: ', error)
         }
     }
 
