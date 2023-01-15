@@ -1,5 +1,6 @@
 import React, {useState,useEffect} from "react";
 
+
 function App() {
    
     const [allFiles, setAllFiles] = useState([]);
@@ -10,8 +11,9 @@ function App() {
 
     const getFile = async () => {
         try{
-            const res = await fetch("http://localhost:8000/:id")
+            const res = await fetch("http://localhost:8000/1")
             const data = await res.json();
+            console.log(data);
             setAllFiles(data)
         }
         catch (error){
@@ -21,7 +23,7 @@ function App() {
 
     return (
        <> <h1>hello user</h1>
-        {allFiles.map(file=><div className="file">{file}</div>)}
+        {allFiles.map((file, index)=><div className="file" key={`file ${index}`}>{file}</div>)}
         </>
     )
 }
