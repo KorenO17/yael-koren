@@ -9,11 +9,11 @@ function Drive() {
     const { passUsername } = useUser()
 
     useEffect(() => {
-        getFile();
+        getFiles();
 
     }, [])
 
-    const getFile = async (e) => {
+    const getFiles = async (e) => {
         e.preventDefault();
   
         try {
@@ -26,72 +26,57 @@ function Drive() {
         }
     }
 
-    const addFolder = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ folderName: folderName, username: passUsername })
-                })
-            const data = await res.json();
-            setAllFiles(data)
-        }
-        catch (error) {
-            console.log("error: ", error)
-        }
-    }
-
-    const addFile = async () => {
-        try {
-            const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fileName: fileName, fileContent: fileContent, username: passUsername })
-                })
-            const data = await res.json();
-            setAllFiles(data)
-        }
-        catch (error) {
-            console.log("error: ", error)
-        }
-    }
-
+    
+    // const addFile = async () => {
+        //     try {
+            //         const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
+            //             {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify({ fileName: fileName, fileContent: fileContent, username: passUsername })
+    //             })
+    //         const data = await res.json();
+    //         setAllFiles(data)
+    //     }
+    //     catch (error) {
+        //         console.log("error: ", error)
+        //     }
+        // }
+        
+        const handleSubmitFolder = async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ folderName: folderName, username: passUsername })
+                    })
+                const data = await res.json();
+                setAllFiles(data)
+            }
+            catch (error) {
+                console.log("error: ", error)
+            }
+        }    
 
     return (
         <>
             <h1>hello {passUsername}</h1>
-            <form onSubmit={(e) => addFolder(e)}>
-                <input name="folderName" value={folderName} onChange={(e) => setFolderName(e.target.value)} type="text" required />
-                <button>add new folder</button>
+            <form onSubmit={handleSubmitFolder}>
+                <input className="DriveFolderInput" type="text" value={folderName} placeholder="folderName" onChange={(e)=>setFolderName(e.target.value)} required />
+                <button className="DriveFolderButton">add new folder</button>
             </form>
-            <form onSubmit={(e) => addFile(e)}>
+            {/* <form onSubmit={(e) => addFile(e)}>
                 <input value={fileName} onChange={(e) => setFileName(e.target.value)} type="text" required />
                 <textarea value={fileContent} onChange={(e) => setFileContent(e.target.value)} required rows="4" cols="50" />
                 <button>add new file</button>
-            </form>
+            </form> */}
             {allFiles.map((file, index) => <div className="file" key={`file ${index}`}>
                 <button value={file.name}>{file.name}</button>
             </div>)}
         </>
     )
-
-    // return (
-    //     <div id="parentDiv">
-    //         <div id="container">
-    //             <h1>Login</h1>
-    //             <form onSubmit={handleSubmit}>
-    //                 <input className="LoginInput" type="text" value={username} placeholder="username" onChange={(e) => setUsername(e.target.value)} />
-    //                 <input className="LoginInput" type="password" value={password} placeholder="password" onChange={(e) => setPassword(e.target.value)} />
-    //                 <button className="Loginbutton" type="submit">login</ button>
-    //                 {/* <button className="toRegisterButton" type="" onClick={}>Register</ button> */}
-    //                 <p>{flag ? "One or more of the details are incorrect" : ""}</p>
-    //             </form>
-    //         </div>
-    //     </div>
-    // )
 }
 
 export default Drive;

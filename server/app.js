@@ -73,7 +73,7 @@ app.get('/shlimziGibut', (req, res) => {
 
 app.post('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
-    console.log("fakeDB: ", fakeDB)
+    console.log("fakeDB0: ", fakeDB)
     let user = fakeDB.find(user => user.username === req.body.username)
     if (req.body.folderName) {
         console.log("user1: ",user);
@@ -81,7 +81,7 @@ app.post('/:username/drive', async (req, res) => {
             console.log("user: ",user);
             fakeDB.find(user => user.username === req.body.username).files.push({ name: req.body.folderName, files: [] })
             user.files.push({ name: req.body.folderName, files: [] })
-            console.log("fakeDB: ", fakeDB)
+            console.log("fakeDB1: ", fakeDB)
             editUsersData(fakeDB)
             fs.mkdirSync(`./users/${currUser}/${req.body.folderName}`, { recursive: true });
             console.log(user.files);
@@ -99,7 +99,6 @@ app.post('/:username/drive', async (req, res) => {
         });
         res.json(user.files)
     }
-
 })
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
