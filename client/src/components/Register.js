@@ -28,8 +28,6 @@ function Register(props) {
             }
             else {
                 setUser(registerUsername)
-                console.log("b")
-                setFlag(false)
                 navigate(`../${registerUsername}/drive`);
             }
         }
@@ -45,7 +43,8 @@ function Register(props) {
                 <form onSubmit={handleSubmit}>
                     <input className="RegisterInput" type="text" value={registerUsername} placeholder="username" onChange={(e) => setRegisterUsername(e.target.value)} />
                     <input className="RegisterInput" type="password" value={registerPassword} placeholder="password" onChange={(e) => setRegisterPassword(e.target.value)} />
-                    <button className="Registerbutton" type="submit">Register</ button>
+                    <button className="Registerbutton" type="submit">Register</ button><br/>
+                    <button className="toLoginButton" type="" onClick={()=>navigate(`../login`)}>To Login Page</ button>
                     <p>{flag ? "This username is already in use" : ""}</p>
                 </form>
             </div>

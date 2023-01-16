@@ -27,11 +27,6 @@ function Login() {
             }
             else {
                 setUser(data.username)
-                console.log("item: ", data)
-                const toDriveResponse = await fetch(`http://localhost:8000/${data.username}/drive`)
-                const toDriveData = await toDriveResponse.json()
-                console.log("toDriveData: ", toDriveData)
-
                 navigate(`../${data.username}/drive`);
             }
         }
@@ -47,8 +42,8 @@ function Login() {
                 <form onSubmit={handleSubmit}>
                     <input className="LoginInput" type="text" value={username} placeholder="username" onChange={(e) => setUsername(e.target.value)} />
                     <input className="LoginInput" type="password" value={password} placeholder="password" onChange={(e) => setPassword(e.target.value)} />
-                    <button className="Loginbutton" type="submit">login</ button>
-                    {/* <button className="toRegisterButton" type="" onClick={}>Register</ button> */}
+                    <button className="Loginbutton" type="submit">login</ button> <br/>
+                    <button className="toRegisterButton" type="" onClick={()=>navigate(`../register`)}>To Register Page</ button>
                     <p>{flag ? "One or more of the details are incorrect" : ""}</p>
                 </form>
             </div>

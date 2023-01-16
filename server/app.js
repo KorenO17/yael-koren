@@ -54,29 +54,38 @@ app.post('/register/:username', async (req, res) => {
 //drive:
 app.get('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
-    const user = fakeDB.find(user => user.username === req.params.username)
-    res.json(user.files)
+    let user = fakeDB.find(user => user.username === req.params.username)
+    let files=user.files
+    let folder={}
+    console.log(req.query.path.split('/'));
+    if (req.query.path === "") res.json(user.files)
+    else {
+        let pathArr = req.query.path.split('/')
+        console.log("path: " + req.query.path);
+        for (let i=1;i<pathArr.length;i++){
+           folder=files.find(folder => folder.name === pathArr[i])
+           if(!folder) break
+            files=folder.files
+        }
+        res.json(files)
+    }
 })
 
 
 app.post('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
     let user = fakeDB.find(user => user.username === req.body.username)
-    // if (req.body.folderName) {
-    //     console.log("user1: ", user);
-    //     if (!fs.existsSync(`./users/${req.body.username}/${req.body.folderName}`)) {
-    //         user.files.push({ name: req.body.folderName, files: [] })
+    if (req.body.folderName) {
+        if (!fs.existsSync(`./users/${req.body.username}/${req.body.folderName}`)) {
+            user.files.push({ name: req.body.folderName, files: [], type: 'folder' });
 
-    //         editUsersData(fakeDB)
-    //         fs.mkdirSync(`./users/${req.body.username}/${req.body.folderName}`, { recursive: true });
-    //         console.log(user.files);
-    //     }
-    //     res.json(user.files)
-    // }
-    if (req.body.fileName) {
-        console.log("enter1");
+            editUsersData(fakeDB)
+            fs.mkdirSync(`./users/${req.body.username}/${req.body.folderName}`, { recursive: true });
+        }
+        res.json(user.files)
+    }
+    else if (req.body.fileName) {
         user.files.push({ name: { nameFlag: false, name: req.body.fileName }, content: { contentFlag: false, content: req.body.fileContent }, type: 'file', info: { infoFlag: false, createTime: new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem' }) } });
-
         editUsersData(fakeDB)
         fs.appendFile(`./users/${req.body.username}/${req.body.fileName}`, req.body.fileContent, function (err) {
             if (err) throw err;
@@ -88,13 +97,19 @@ app.post('/:username/drive', async (req, res) => {
 app.post('/:username/renameFile', async (req, res) => {
     let fakeDB = await getUsersData();
     let user = fakeDB.find(user => user.username === req.body.username)
-    
-    let tempUser = user.files.find(file => file.name.name === req.body.fileName);
-    tempUser.name.name = req.body.newFileName;
+    let tempUserFile = user.files.find(file => file.name.name === req.body.fileName);
+    tempUserFile.name.name = req.body.newFileName;
     editUsersData(fakeDB)
 
-    console.log("enter2");
     fs.rename(`./users/${req.body.username}/${req.body.fileName}`, `./users/${req.body.username}/${req.body.newFileName}`, (err) => { if (err) throw err; })
+})
+
+app.post('/:username/deleteFile', async (req, res) => {
+    let fakeDB = await getUsersData();
+    let user = fakeDB.find(user => user.username === req.body.username)
+    user.files.splice(req.body.index,1)
+    editUsersData(fakeDB)
+    fs.unlink(`./users/${req.body.username}/${req.body.fileName}`, (err) => { if (err) throw err; })
 })
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
