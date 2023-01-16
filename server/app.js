@@ -4,6 +4,7 @@ var cors = require('cors');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
+const { json } = require('express');
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -17,40 +18,89 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let fakeDB = {
-    users:
-        [
-            { username: "a", password: "a", id: 1, files: ["a", "b", "c", "d", "e", "f", "g", "h", "i"] },
-            { username: "b", password: "b", id: 2, files: ["j", "k", "l"] }
-        ]
+function getUsersData() {
+    return new Promise((resolve, reject) => {
+        fs.readFile(path.join(__dirname, './users.json'), 'utf8', (err, data) => {
+            if (!data) return resolve([]);
+            let fakeDB = JSON.parse(data)
+            console.log("fake Db 1: ", fakeDB);
+            resolve(fakeDB)
+        });
+    });
 }
 
+function editUsersData(data) {
+    fs.writeFile(path.join(__dirname, './users.json'), JSON.stringify(data), (err) => err && console.error(err));
+}
+
+let currUser = ""
+
 //login:
-app.post('/:username', (req, res) => {
-    const user = fakeDB.users.find(user => (user.password === req.body.password && user.username === req.body.username))
-    console.log(user)
+app.post('/:username', async (req, res) => {
+    let fakeDB = await getUsersData();
+    console.log("fake Db 2: ", fakeDB);
+    const user = fakeDB.find(user => (user.password === req.body.password && user.username === req.body.username))
+    currUser = req.body.username
     res.json(user ? user : [])
 })
 
 //register:
-app.post('/register/:username', (req, res) => {
-    const user = fakeDB.users.find(user => user.username === req.body.username)
+app.post('/register/:username', async (req, res) => {
+    let fakeDB = await getUsersData();
+    const user = fakeDB.find(user => user.username === req.body.username)
     console.log(user)
     if (!user) {
-        fakeDB.users.push({ username: req.body.username, password: req.body.password, id: fakeDB.users.length + 1, files: [] })
-        console.log(fakeDB.users)
+        fakeDB.push({ username: req.body.username, password: req.body.password, id: fakeDB.length + 1, files: [] })
+        console.log("fake Db 3: ", fakeDB);
+        editUsersData(fakeDB)
         fs.mkdir(`./users/${req.body.username}`, (err) => { if (err) throw err; });
     }
-    res.json(user ? "This username is already in use" : null)
+    currUser = req.body.username
+    res.json(user ? "This username is already in use" : req.body.username)
 })
 
 //drive:
-app.get('/:username/drive', (req, res) => {
-    const user = fakeDB.users.find(user => user.username === req.params.username)
+app.get('/:username/drive', async (req, res) => {
+    let fakeDB = await getUsersData();
+    const user = fakeDB.find(user => user.username === req.params.username)
     console.log(user.files)
     res.json(user.files)
 })
 
+app.get('/shlimziGibut', (req, res) => {
+    res.json(currUser)
+})
+
+app.post('/:username/drive', async (req, res) => {
+    let fakeDB = await getUsersData();
+    console.log("fakeDB: ", fakeDB)
+    if (req.body.folderName) {
+        let user = fakeDB.find(user => user.username === req.params.username)
+        console.log("user1: ",user);
+        if (!fs.existsSync(`./users/${currUser}/${req.body.folderName}`)) {
+            console.log("user: ",user);
+            fakeDB.find(user => user.username === req.params.username).files.push({ name: req.body.folderName, files: [] })
+            user.files.push({ name: req.body.folderName, files: [] })
+            console.log("fakeDB: ", fakeDB)
+            editUsersData(fakeDB)
+            fs.mkdirSync(`./users/${currUser}/${req.body.folderName}`, { recursive: true });
+            console.log(user.files);
+        }
+        res.json(user.files)
+    }
+    else if (req.body.fileName) {
+        fakeDB.find(user => user.username === req.params.username).files.push({ name: req.body.fileName })
+        console.log(req.body.fileName);
+        console.log(req.body.fileContent);
+        editUsersData(fakeDB)
+        fs.appendFile(`./users/${currUser}/${req.body.fileName}`, req.body.fileContent, function (err) {
+            if (err) throw err;
+            console.log('Saved!');
+        });
+        res.json(user.files)
+    }
+
+})
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 

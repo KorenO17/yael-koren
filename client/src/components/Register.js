@@ -6,7 +6,7 @@ import { useUser } from '../userContexts/UserContext';
 function Register(props) {
     const [registerUsername, setRegisterUsername] = useState("")
     const [registerPassword, setRegisterPassword] = useState("")
-    // const { userId, setUserId } = useUser(null);
+    const {setUser} = useUser()
     const [flag, setFlag] = useState(false)
     const navigate = useNavigate();
 
@@ -27,9 +27,10 @@ function Register(props) {
                 return
             }
             else {
+                setUser(registerUsername)
                 console.log("b")
                 setFlag(false)
-                navigate(`../${registerUsername}/drive`, { state: {username: registerUsername }});
+                navigate(`../${registerUsername}/drive`);
             }
         }
         catch (error) {
