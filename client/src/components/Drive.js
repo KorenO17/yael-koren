@@ -13,7 +13,9 @@ function Drive() {
 
     }, [])
 
-    const getFile = async () => {
+    const getFile = async (e) => {
+        e.preventDefault();
+  
         try {
             const res = await fetch(`http://localhost:8000/${passUsername}/drive`)
             const data = await res.json();
@@ -24,13 +26,14 @@ function Drive() {
         }
     }
 
-    const addFolder = async () => {
+    const addFolder = async (e) => {
+        e.preventDefault();
         try {
             const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ folderName: folderName })
+                    body: JSON.stringify({ folderName: folderName, username: passUsername })
                 })
             const data = await res.json();
             setAllFiles(data)
@@ -46,7 +49,7 @@ function Drive() {
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ fileName: fileName, fileContent: fileContent })
+                    body: JSON.stringify({ fileName: fileName, fileContent: fileContent, username: passUsername })
                 })
             const data = await res.json();
             setAllFiles(data)
@@ -58,7 +61,8 @@ function Drive() {
 
 
     return (
-        <> <h1>hello {passUsername}</h1>
+        <>
+            <h1>hello {passUsername}</h1>
             <form onSubmit={(e) => addFolder(e)}>
                 <input name="folderName" value={folderName} onChange={(e) => setFolderName(e.target.value)} type="text" required />
                 <button>add new folder</button>

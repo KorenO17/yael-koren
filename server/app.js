@@ -74,12 +74,12 @@ app.get('/shlimziGibut', (req, res) => {
 app.post('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
     console.log("fakeDB: ", fakeDB)
+    let user = fakeDB.find(user => user.username === req.body.username)
     if (req.body.folderName) {
-        let user = fakeDB.find(user => user.username === req.params.username)
         console.log("user1: ",user);
         if (!fs.existsSync(`./users/${currUser}/${req.body.folderName}`)) {
             console.log("user: ",user);
-            fakeDB.find(user => user.username === req.params.username).files.push({ name: req.body.folderName, files: [] })
+            fakeDB.find(user => user.username === req.body.username).files.push({ name: req.body.folderName, files: [] })
             user.files.push({ name: req.body.folderName, files: [] })
             console.log("fakeDB: ", fakeDB)
             editUsersData(fakeDB)
@@ -89,7 +89,7 @@ app.post('/:username/drive', async (req, res) => {
         res.json(user.files)
     }
     else if (req.body.fileName) {
-        fakeDB.find(user => user.username === req.params.username).files.push({ name: req.body.fileName })
+        fakeDB.find(user => user.username === req.body.username).files.push({ name: req.body.fileName })
         console.log(req.body.fileName);
         console.log(req.body.fileContent);
         editUsersData(fakeDB)
