@@ -57,11 +57,9 @@ app.get('/:username/drive', async (req, res) => {
     let user = fakeDB.find(user => user.username === req.params.username)
     let files=user.files
     let folder={}
-    console.log(req.query.path.split('/'));
     if (req.query.path === "") res.json(user.files)
     else {
         let pathArr = req.query.path.split('/')
-        console.log("path: " + req.query.path);
         for (let i=1;i<pathArr.length;i++){
            folder=files.find(folder => folder.name === pathArr[i])
            if(!folder) break
