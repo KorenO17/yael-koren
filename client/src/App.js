@@ -12,12 +12,14 @@ function App() {
     <BrowserRouter>
       <UserProvider>
         <Routes>
-          <Route index element={<Navigate replace to={'/login'}/>} />
-          <Route path="/login" element={<Login/>} />
-          <Route path="/register" element={<Register/>} />
-          <Route path="/:username/drive" element={<Drive/>}/>
+          <Route index element={<Navigate replace to={'/login'} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/:username/drive" element={<Drive />}>
+            <Route path="/:username/drive/*" element={<Drive />} />
+          </Route>
         </Routes>
-        
+
         {/* <Route path="*" element={<Error/>} /> */}
       </UserProvider>
     </BrowserRouter>

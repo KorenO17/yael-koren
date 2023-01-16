@@ -23,7 +23,7 @@ function getUsersData() {
         fs.readFile(path.join(__dirname, './users.json'), 'utf8', (err, data) => {
             if (!data) return resolve([]);
             let fakeDB = JSON.parse(data)
-            console.log("fake Db 1: ", fakeDB);
+            // console.log("fake Db 1: ", fakeDB);
             resolve(fakeDB)
         });
     });
@@ -38,7 +38,7 @@ function editUsersData(data) {
 //login:
 app.post('/:username', async (req, res) => {
     let fakeDB = await getUsersData();
-    console.log("fake Db 2: ", fakeDB);
+    // console.log("fake Db 2: ", fakeDB);
     const user = fakeDB.find(user => (user.password === req.body.password && user.username === req.body.username))
     res.json(user ? user : [])
 })
@@ -47,10 +47,10 @@ app.post('/:username', async (req, res) => {
 app.post('/register/:username', async (req, res) => {
     let fakeDB = await getUsersData();
     const user = fakeDB.find(user => user.username === req.body.username)
-    console.log(user)
+    // console.log(user)
     if (!user) {
         fakeDB.push({ username: req.body.username, password: req.body.password, id: fakeDB.length + 1, files: [] })
-        console.log("fake Db 3: ", fakeDB);
+        // console.log("fake Db 3: ", fakeDB);
         editUsersData(fakeDB)
         fs.mkdir(`./users/${req.body.username}`, (err) => { if (err) throw err; });
     }
@@ -60,9 +60,21 @@ app.post('/register/:username', async (req, res) => {
 //drive:
 app.get('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
-    const user = fakeDB.find(user => user.username === req.params.username)
-    console.log(user.files)
-    res.json(user.files)
+    let user = fakeDB.find(user => user.username === req.params.username)
+    let files=user.files
+    let us={}
+    console.log(req.query.path.split('/'));
+    if (req.query.path === "") res.json(user.files)
+    else {
+        let pathArr = req.query.path.split('/')
+        console.log("path: " + req.query.path);
+        for (let i=1;i<pathArr.length;i++){
+           us=files.find(folder => folder.name === pathArr[i])
+           if(!us) break
+            files=us.files
+        }
+        res.json(files)
+    }
 })
 
 
@@ -73,16 +85,16 @@ app.post('/:username/drive', async (req, res) => {
     if (req.body.folderName) {
         console.log("user1: ", user);
         if (!fs.existsSync(`./users/${req.body.username}/${req.body.folderName}`)) {
-            user.files.push({ name: req.body.folderName, files: [] })
-         
+            user.files.push({ name: req.body.folderName, files: [], type: 'folder' });
+
             editUsersData(fakeDB)
             fs.mkdirSync(`./users/${req.body.username}/${req.body.folderName}`, { recursive: true });
-            console.log(user.files);
+            // console.log(user.files);
         }
         res.json(user.files)
     }
     else if (req.body.fileName) {
-        user.files.push({ name: req.body.fileName})
+        user.files.push({ name: req.body.fileName })
         console.log(req.body.fileName);
         console.log(req.body.fileContent);
         editUsersData(fakeDB)
