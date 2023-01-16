@@ -33,14 +33,13 @@ function editUsersData(data) {
     fs.writeFile(path.join(__dirname, './users.json'), JSON.stringify(data), (err) => err && console.error(err));
 }
 
-let currUser = ""
+
 
 //login:
 app.post('/:username', async (req, res) => {
     let fakeDB = await getUsersData();
     console.log("fake Db 2: ", fakeDB);
     const user = fakeDB.find(user => (user.password === req.body.password && user.username === req.body.username))
-    currUser = req.body.username
     res.json(user ? user : [])
 })
 
@@ -55,7 +54,6 @@ app.post('/register/:username', async (req, res) => {
         editUsersData(fakeDB)
         fs.mkdir(`./users/${req.body.username}`, (err) => { if (err) throw err; });
     }
-    currUser = req.body.username
     res.json(user ? "This username is already in use" : req.body.username)
 })
 
@@ -67,33 +65,28 @@ app.get('/:username/drive', async (req, res) => {
     res.json(user.files)
 })
 
-app.get('/shlimziGibut', (req, res) => {
-    res.json(currUser)
-})
 
 app.post('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
     console.log("fakeDB: ", fakeDB)
     let user = fakeDB.find(user => user.username === req.body.username)
     if (req.body.folderName) {
-        console.log("user1: ",user);
-        if (!fs.existsSync(`./users/${currUser}/${req.body.folderName}`)) {
-            console.log("user: ",user);
-            fakeDB.find(user => user.username === req.body.username).files.push({ name: req.body.folderName, files: [] })
+        console.log("user1: ", user);
+        if (!fs.existsSync(`./users/${req.body.username}/${req.body.folderName}`)) {
             user.files.push({ name: req.body.folderName, files: [] })
-            console.log("fakeDB: ", fakeDB)
+         
             editUsersData(fakeDB)
-            fs.mkdirSync(`./users/${currUser}/${req.body.folderName}`, { recursive: true });
+            fs.mkdirSync(`./users/${req.body.username}/${req.body.folderName}`, { recursive: true });
             console.log(user.files);
         }
         res.json(user.files)
     }
     else if (req.body.fileName) {
-        fakeDB.find(user => user.username === req.body.username).files.push({ name: req.body.fileName })
+        user.files.push({ name: req.body.fileName})
         console.log(req.body.fileName);
         console.log(req.body.fileContent);
         editUsersData(fakeDB)
-        fs.appendFile(`./users/${currUser}/${req.body.fileName}`, req.body.fileContent, function (err) {
+        fs.appendFile(`./users/${req.body.username}/${req.body.fileName}`, req.body.fileContent, function (err) {
             if (err) throw err;
             console.log('Saved!');
         });
