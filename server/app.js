@@ -28,6 +28,18 @@ function getUsersData() {
     });
 }
 
+function getPathFiles(user,path){
+    let files=user.files
+    let folder={}
+    let pathArr = path.split('/')
+    for (let i=1;i<pathArr.length;i++){
+       folder=files.find(folder => folder.name === pathArr[i])
+       if(!folder) break
+        files=folder.files
+    }
+    return files
+}
+
 function editUsersData(data) {
     fs.writeFile(path.join(__dirname, './users.json'), JSON.stringify(data), (err) => err && console.error(err));
 }
@@ -73,41 +85,51 @@ app.get('/:username/drive', async (req, res) => {
 app.post('/:username/drive', async (req, res) => {
     let fakeDB = await getUsersData();
     let user = fakeDB.find(user => user.username === req.body.username)
+    let files=user.files
+    let folder={}
+    let pathArr = req.query.path.split('/')
+    for (let i=1;i<pathArr.length;i++){
+       folder=files.find(folder => folder.name === pathArr[i])
+       if(!folder) break
+        files=folder.files
+    }
     if (req.body.folderName) {
-        if (!fs.existsSync(`./users/${req.body.username}/${req.body.folderName}`)) {
-            user.files.push({ name: req.body.folderName, files: [], type: 'folder' });
+        if (!fs.existsSync(`./users/${req.body.username}${req.query.path}/${req.body.folderName}`)) {
+            files.push({ name: req.body.folderName, files: [], type: 'folder' });
 
             editUsersData(fakeDB)
-            fs.mkdirSync(`./users/${req.body.username}/${req.body.folderName}`, { recursive: true });
+            fs.mkdirSync(`./users/${req.body.username}${req.query.path}/${req.body.folderName}`, { recursive: true });
         }
-        res.json(user.files)
+        res.json(files)
     }
     else if (req.body.fileName) {
-        user.files.push({ name: { nameFlag: false, name: req.body.fileName }, content: { contentFlag: false, content: req.body.fileContent }, type: 'file', info: { infoFlag: false, createTime: new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem' }) } });
+        files.push({ name: { nameFlag: false, name: req.body.fileName }, content: { contentFlag: false, content: req.body.fileContent }, type: 'file', info: { infoFlag: false, createTime: new Date().toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem' }) } });
         editUsersData(fakeDB)
-        fs.appendFile(`./users/${req.body.username}/${req.body.fileName}`, req.body.fileContent, function (err) {
+        fs.appendFile(`./users/${req.body.username}${req.query.path}/${req.body.fileName}`, req.body.fileContent, function (err) {
             if (err) throw err;
         });
 
-        res.json(user.files)
+        res.json(files)
     }
 })
 app.post('/:username/renameFile', async (req, res) => {
     let fakeDB = await getUsersData();
     let user = fakeDB.find(user => user.username === req.body.username)
-    let tempUserFile = user.files.find(file => file.name.name === req.body.fileName);
+    let files=getPathFiles(user, req.query.path)
+    let tempUserFile = files.find(file => file.name.name === req.body.fileName);
     tempUserFile.name.name = req.body.newFileName;
     editUsersData(fakeDB)
-
-    fs.rename(`./users/${req.body.username}/${req.body.fileName}`, `./users/${req.body.username}/${req.body.newFileName}`, (err) => { if (err) throw err; })
+    fs.rename(`./users/${req.body.username}${req.query.path}/${req.body.fileName}`, `./users/${req.body.username}${req.query.path}/${req.body.newFileName}`, (err) => { if (err) throw err; })
 })
 
 app.post('/:username/deleteFile', async (req, res) => {
     let fakeDB = await getUsersData();
     let user = fakeDB.find(user => user.username === req.body.username)
-    user.files.splice(req.body.index,1)
+    let files=getPathFiles(user, req.query.path)
+  
+    files.splice(req.body.index,1)
     editUsersData(fakeDB)
-    fs.unlink(`./users/${req.body.username}/${req.body.fileName}`, (err) => { if (err) throw err; })
+    fs.unlink(`./users/${req.body.username}${req.query.path}/${req.body.fileName}`, (err) => { if (err) throw err; })
 })
 // app.use('/', indexRouter);
 // app.use('/users', usersRouter);

@@ -22,7 +22,7 @@ function Register(props) {
             })
             const data = await response.json();
             
-            if (data === "This username is already in use") { //username or password already exist
+            if (data === "This username is already in use") {
                 setFlag(true)
                 return
             }

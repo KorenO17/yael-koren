@@ -22,7 +22,6 @@ function Drive() {
 
     const getFile = async (e) => {
         e?.preventDefault();
-
         try {
             let url = location.pathname
             let arr = url.split(`/${passUsername}/drive`)
@@ -42,7 +41,7 @@ function Drive() {
     const addFile = async (e, fileNameToCopy, fileContentToCopy) => {
         e?.preventDefault();
         try {
-            const res = await fetch(`http://localhost:8000/${passUsername}/drive`,
+            const res = await fetch(`http://localhost:8000/${passUsername}/drive?path=${folderPath}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -75,7 +74,7 @@ function Drive() {
 
     const sendRenameToServer = async (prevFileName) => {
         try {
-            const response = await fetch(`http://localhost:8000/${passUsername}/renameFile`,
+            const response = await fetch(`http://localhost:8000/${passUsername}/renameFile?path=${folderPath}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -91,7 +90,7 @@ function Drive() {
 
     const deleteFile = async (FileNameToDelete, index)=> {
         try {
-            const response = await fetch(`http://localhost:8000/${passUsername}/deleteFile`,
+            const response = await fetch(`http://localhost:8000/${passUsername}/deleteFile?path=${folderPath}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -124,9 +123,7 @@ function Drive() {
             </form>
 
             {allFiles.map((file, index) => <div className="container" key={`file ${index}`}>
-                {/* <button value={file.name}>{file.name}</button> */}
 
-                {/* files rendering: */}
                 {file.type === "file" ?
                     <div className="filesDiv">
                         <h1>File Name : {file.name.name}</h1>
@@ -177,7 +174,7 @@ function Drive() {
                         }}>Delete</button>
 
 
-                    </div> : <button value={file.name} onClick={()=>enter(file.name)}>{file.name}</button> }
+                    </div> : <button className="folderButton" value={file.name} onClick={()=>enter(file.name)}>{file.name}</button> }
 
             </div>)}
         </>
